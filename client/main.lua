@@ -4,6 +4,7 @@ local PlayerData = QBCore.Functions.GetPlayerData()
 local route = 1
 local max = #Config.NPCLocations.Locations
 local busBlip = nil
+local PlayerJob = {}
 
 local NpcData = {
     Active = false,
@@ -50,6 +51,7 @@ local function updateBlip()
         BeginTextCommandSetBlipName("STRING")
         AddTextComponentSubstringPlayerName(Lang:t('info.bus_depot'))
         EndTextCommandSetBlipName(busBlip)
+        SetNewWaypoint(Config.Location.x, Config.Location.y)
     elseif busBlip ~= nil then
         RemoveBlip(busBlip)
     end
@@ -106,6 +108,7 @@ local function GetDeliveryLocation()
                 repeat
                     Wait(0)
                     if IsControlJustPressed(0, 38) then
+                      if whitelistedVehicle() then
                         local ped = PlayerPedId()
                         local veh = GetVehiclePedIsIn(ped, 0)
                         TaskLeaveVehicle(NpcData.Npc, veh, 0)
@@ -129,6 +132,9 @@ local function GetDeliveryLocation()
                         exports["qb-core"]:HideText()
                         PolyZone:destroy()
                         break
+                      else
+                        QBCore.Functions.Notify(Lang:t('error.not_in_bus'), 'error')
+                      end
                     end
                 until not inRange
             end)
@@ -209,9 +215,10 @@ RegisterNetEvent('QBCore:Client:OnPlayerUnload', function()
 end)
 
 RegisterNetEvent('QBCore:Client:OnJobUpdate', function(JobInfo)
-    PlayerData.job = JobInfo
+  PlayerJob = JobInfo
+  if PlayerJob.name == "bus" then
     updateBlip()
-
+  end
 end)
 
 RegisterNetEvent('qb-busjob:client:DoBusNpc', function()
@@ -252,6 +259,7 @@ RegisterNetEvent('qb-busjob:client:DoBusNpc', function()
                         repeat
                             Wait(5)
                             if IsControlJustPressed(0, 38) then
+                              if whitelistedVehicle() then
                                 local ped = PlayerPedId()
                                 local veh = GetVehiclePedIsIn(ped, 0)
                                 local maxSeats, freeSeat = GetVehicleMaxNumberOfPassengers(veh)
@@ -276,6 +284,9 @@ RegisterNetEvent('qb-busjob:client:DoBusNpc', function()
                                 exports["qb-core"]:HideText()
                                 PolyZone:destroy()
                                 break
+                              else
+                                QBCore.Functions.Notify(Lang:t('error.not_in_bus'), 'error')
+                              end
                             end
                         until not inRange
                     end)
