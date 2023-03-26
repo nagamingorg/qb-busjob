@@ -40,21 +40,17 @@ local function resetNpcTask()
     }
 end
 
-local function updateBlip()
-    if PlayerData.job.name == "bus" then
-        busBlip = AddBlipForCoord(Config.Location)
-        SetBlipSprite(busBlip, 513)
-        SetBlipDisplay(busBlip, 4)
-        SetBlipScale(busBlip, 0.6)
-        SetBlipAsShortRange(busBlip, true)
-        SetBlipColour(busBlip, 49)
-        BeginTextCommandSetBlipName("STRING")
-        AddTextComponentSubstringPlayerName(Lang:t('info.bus_depot'))
-        EndTextCommandSetBlipName(busBlip)
-        SetNewWaypoint(Config.Location.x, Config.Location.y)
-    elseif busBlip ~= nil then
-        RemoveBlip(busBlip)
-    end
+local function CreateElements()
+  local busBlip = AddBlipForCoord(Config.Location)
+  SetBlipSprite(busBlip, 513)
+  SetBlipDisplay(busBlip, 4)
+  SetBlipScale(busBlip, 0.6)
+  SetBlipAsShortRange(busBlip, true)
+  SetBlipColour(busBlip, 49)
+  BeginTextCommandSetBlipName("STRING")
+  AddTextComponentSubstringPlayerName(Lang:t('info.bus_depot'))
+  EndTextCommandSetBlipName(busBlip)
+  SetNewWaypoint(Config.Location.x, Config.Location.y)
 end
 
 local function whitelistedVehicle()
@@ -117,6 +113,7 @@ local function GetDeliveryLocation()
                         local targetCoords = Config.NPCLocations.Locations[NpcData.LastNpc]
                         TaskGoStraightToCoord(NpcData.Npc, targetCoords.x, targetCoords.y, targetCoords.z, 1.0, -1, 0.0, 0.0)
                         QBCore.Functions.Notify(Lang:t('success.dropped_off'), 'success')
+                        --TriggerServerEvent('qb-busjob:server:NpcPay')
                         if NpcData.DeliveryBlip ~= nil then
                             RemoveBlip(NpcData.DeliveryBlip)
                         end
@@ -135,6 +132,7 @@ local function GetDeliveryLocation()
                       else
                         QBCore.Functions.Notify(Lang:t('error.not_in_bus'), 'error')
                       end
+                      break
                     end
                 until not inRange
             end)
@@ -198,26 +196,24 @@ RegisterNetEvent("qb-busjob:client:TakeVehicle", function(data)
 end)
 
 -- Events
-AddEventHandler('onResourceStart', function(resourceName)
+/*AddEventHandler('onResourceStart', function(resourceName)
     -- handles script restarts
     if GetCurrentResourceName() == resourceName then
-        updateBlip()
+      CreateElements()
     end
-end)
+end)*/
 
 RegisterNetEvent('QBCore:Client:OnPlayerLoaded', function()
-    PlayerData = QBCore.Functions.GetPlayerData()
-    updateBlip()
-end)
-
-RegisterNetEvent('QBCore:Client:OnPlayerUnload', function()
-    PlayerData = {}
+  PlayerJob = QBCore.Functions.GetPlayerData().job
+  if PlayerJob.name == "bus" then
+      CreateElements()
+  end
 end)
 
 RegisterNetEvent('QBCore:Client:OnJobUpdate', function(JobInfo)
   PlayerJob = JobInfo
   if PlayerJob.name == "bus" then
-    updateBlip()
+    CreateElements()
   end
 end)
 
@@ -270,20 +266,27 @@ RegisterNetEvent('qb-busjob:client:DoBusNpc', function()
                                         break
                                     end
                                 end
-
                                 ClearPedTasksImmediately(NpcData.Npc)
-                                FreezeEntityPosition(NpcData.Npc, false)
-                                TaskEnterVehicle(NpcData.Npc, veh, -1, freeSeat, 1.0, 0)
-                                QBCore.Functions.Notify(Lang:t('info.goto_busstop'), 'primary')
-                                if NpcData.NpcBlip ~= nil then
-                                    RemoveBlip(NpcData.NpcBlip)
+                                if GetVehicleDoorLockStatus(veh) ~= 1 then
+                                  repeat
+                                    QBCore.Functions.Notify(Lang:t("error.vehicleLocked"), 'error', 2000)
+                                    Wait(2000)
+                                  until(GetVehicleDoorLockStatus(veh) == 1)
+                                else
+                                  FreezeEntityPosition(NpcData.Npc, false)
+                                  TaskEnterVehicle(NpcData.Npc, veh, -1, freeSeat, 1.0, 0)
+                                  QBCore.Functions.Notify(Lang:t('info.goto_busstop'), 'primary')
+                                  TriggerServerEvent('qb-busjob:server:NpcPay')
+                                  if NpcData.NpcBlip ~= nil then
+                                      RemoveBlip(NpcData.NpcBlip)
+                                  end
+                                  GetDeliveryLocation()
+                                  NpcData.NpcTaken = true
+                                  
+                                  exports["qb-core"]:HideText()
+                                  PolyZone:destroy()
+                                  break
                                 end
-                                GetDeliveryLocation()
-                                NpcData.NpcTaken = true
-                                TriggerServerEvent('qb-busjob:server:NpcPay')
-                                exports["qb-core"]:HideText()
-                                PolyZone:destroy()
-                                break
                               else
                                 QBCore.Functions.Notify(Lang:t('error.not_in_bus'), 'error')
                               end
@@ -313,7 +316,7 @@ CreateThread(function()
     })
     PolyZone:onPlayerInOut(function(isPointInside)
         local inVeh = whitelistedVehicle()
-        if PlayerData.job.name == "bus" then
+        if QBCore.Functions.GetPlayerData().job.name == "bus" then
             if isPointInside then
                 inRange = true
                 CreateThread(function()

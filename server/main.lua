@@ -14,17 +14,18 @@ end
 RegisterNetEvent('qb-busjob:server:NpcPay', function()
     local src = source
     local Player = QBCore.Functions.GetPlayer(src)
-    local Payment = math.random(15, 25)
+    local Payment = math.random(125, 200)
     if Player.PlayerData.job.name == "bus" then
         if NearBus(src) then
             local randomAmount = math.random(1, 5)
             local r1, r2 = math.random(1, 5), math.random(1, 5)
             if randomAmount == r1 or randomAmount == r2 then Payment = Payment + math.random(10, 20) end
             Player.Functions.AddMoney('cash', Payment)
+            TriggerClientEvent('QBCore:Notify', src, 'You were paid $' .. Payment .. ' in cash', 'success')
         else
-            DropPlayer(src, 'Attempting To Exploit')
+            DropPlayer(src, 'Attempting to exploit')
         end
     else
-        DropPlayer(src, 'Attempting To Exploit')
+        DropPlayer(src, 'Attempting to exploit')
     end
 end)

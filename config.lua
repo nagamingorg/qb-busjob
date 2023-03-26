@@ -1,13 +1,14 @@
 Config = Config or {}
 
 Config.AllowedVehicles = {
-    [1] = {model = "bus", label = Lang:t('info.bus')},
+    [1] = {model = "bus", label = "City bus"},
+    [2] = {model = "coach", label = "Coach bus"}
 }
 
 Config.Location = vector4(-304.84, 6118.36, 31.5, 312.38)
 
 Config.NPCLocations = {
-    Locations = {
+  Locations = {
 		vector4(-127.85, 6322.04, 31.5, 135.16),
 		vector4(-756.42, 5518.57, 35.55, 216.86),
 		vector4(-2199.98, 4252.3, 47.67, 44.29),
@@ -27,7 +28,22 @@ Config.NPCLocations = {
 		vector4(2107.25, 4739.72, 41.03, 227.38),
 		vector4(1680.37, 4824.45, 42.02, 97.79),
 		vector4(1690.18, 6405.17, 31.62, 167.1),
-    }
+  }
+  /*
+  [1] = {
+    vector4(-125.7, 6322.77, 31.5, 135.43),
+    vector4(-125.33, 6320.46, 31.5, 143.86),
+    vector4(-126.15, 6321.75, 31.5, 138.28),
+    vector4(-127.14, 6322.87, 31.5, 130.83),
+    vector4(-124.17, 6322.05, 31.5, 127.79),
+    vector4(-127.54, 6325.42, 31.5, 158.32),
+    vector4(-128.82, 6324.81, 31.51, 193.12),
+    vector4(-128.19, 6323.42, 31.5, 148.48)
+  },
+  [2] = {
+    
+  },
+  */
 }
 
 Config.NpcSkins = {
