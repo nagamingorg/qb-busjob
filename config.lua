@@ -1,4 +1,5 @@
 Config = Config or {}
+Config.UseTarget = GetConvar('UseTarget', 'false') == 'true'
 
 Config.AllowedVehicles = {
     [1] = {model = "bus", label = "City bus"},
