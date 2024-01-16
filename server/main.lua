@@ -4,7 +4,7 @@ function NearBus(src)
     local ped = GetPlayerPed(src)
     local coords = GetEntityCoords(ped)
     for _, v in pairs(Config.NPCLocations.Locations) do
-        local dist = #(coords - vector3(v.x,v.y,v.z))
+        local dist = #(coords - vector3(v.x, v.y, v.z))
         if dist < 20 then
             return true
         end
@@ -23,9 +23,9 @@ RegisterNetEvent('qb-busjob:server:NpcPay', function()
             Player.Functions.AddMoney('cash', Payment)
             TriggerClientEvent('QBCore:Notify', src, 'You were paid $' .. Payment .. ' in cash', 'success')
         else
-            DropPlayer(src, 'Attempting to exploit')
+            DropPlayer(src, Lang:t('error.exploit'))
         end
     else
-        DropPlayer(src, 'Attempting to exploit')
+        DropPlayer(src, Lang:t('error.exploit'))
     end
 end)

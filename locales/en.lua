@@ -5,6 +5,7 @@ local Translations = {
         one_bus_active = 'You can only have one active bus at a time',
         drop_off_passengers = 'Drop off the passengers before you stop working',
         vehicleLocked = 'Your doors are locked!',
+        exploit = "Attempting To Exploit"
     },
     success = {
         dropped_off = 'Person was dropped off',
